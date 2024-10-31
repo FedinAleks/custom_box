@@ -1,0 +1,20 @@
+body { margin: 0; }
+        canvas { display: block; }
+        .controls {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            margin-top: 80px;
+            margin-left: 100px;
+            z-index: 10;
+            background: #a0a0a0;
+            padding: 10px;
+            border-radius: 5px;
+            gap: 15px;
+        }
+        small {
+            display: block;
+            margin-top: 5px;
+            color: #555; /* Change color as needed */
+            font-size: 0.9em; /* Adjust font size if desired */
+        }
