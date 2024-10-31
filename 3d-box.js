@@ -21,9 +21,15 @@ function init() {
 
     // Налаштування рендера
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const visualizationContainer = document.querySelector(".visualization");
+    if (visualizationContainer) {
+        renderer.setSize(visualizationContainer.clientWidth, visualizationContainer.clientHeight);
+        visualizationContainer.appendChild(renderer.domElement);
+    } else {
+        console.error("Контейнер .visualization не знайдено.");
+    }
+
     renderer.setClearColor(0xffffff); // Встановлення білого фону
-    document.body.appendChild(renderer.domElement);
 
     // Додавання освітлення
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -45,6 +51,15 @@ function init() {
 
     // Запуск анімації
     animate();
+
+    // Додати обробник подій для зміни розміру вікна
+    window.addEventListener("resize", () => {
+        if (visualizationContainer) {
+            renderer.setSize(visualizationContainer.clientWidth, visualizationContainer.clientHeight);
+            camera.aspect = visualizationContainer.clientWidth / visualizationContainer.clientHeight;
+            camera.updateProjectionMatrix();
+        }
+    });
 }
 
 // Функція для створення коробки з контурами, ручками та кришкою
@@ -122,9 +137,6 @@ function addHandles(width, height, boxGroup) {
     boxGroup.add(handleRight);
 }
 
-
-
-
 // Функція для оновлення розмірів коробки
 function updateBoxDimensions() {
     const widthInput = document.getElementById("width");
@@ -143,14 +155,7 @@ function updateBoxDimensions() {
 
     if (!widthValid || !depthValid || !heightValid) {
         errorMessage.innerHTML = `
-            <p>Помилка: введені значення виходять за межі допустимих.</p>
-            <p>Допустимі розміри:</p>
-            <ul>
-                <li>Ширина (Width): ${limits.width.min} - ${limits.width.max}</li>
-                <li>Глибина (Depth): ${limits.depth.min} - ${limits.depth.max}</li>
-                <li>Висота (Height): ${limits.height.min} - ${limits.height.max}</li>
-            </ul>
-        `;
+            <p>Помилка: введені значення виходять за межі допустимих.</p>`;
     } else {
         errorMessage.textContent = "";
         createBoxWithHandles(width, height, depth, true); // Оновлення коробки з новими розмірами
@@ -169,8 +174,8 @@ function animate() {
     }
 
     controls.update(); // Оновлення контролерів
-    renderer.render(scene, camera);
+    renderer.render(scene, camera); // Рендеринг сцени
 }
 
-// Виклик функції ініціалізації
+// Запускаємо ініціалізацію
 init();
