@@ -18,3 +18,8 @@ body { margin: 0; }
             color: #555; /* Change color as needed */
             font-size: 0.9em; /* Adjust font size if desired */
         }
+        h1 {
+            position: absolute;
+            left: 30%;
+            top: 8%;
+        }
