@@ -29,7 +29,7 @@ function init() {
         console.error("Контейнер .visualization не знайдено.");
     }
 
-    renderer.setClearColor(0xffffff); // Встановлення білого фону
+    renderer.setClearColor(0xebebeb); // Встановлення білого фону
 
     // Додавання освітлення
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -162,20 +162,78 @@ function updateBoxDimensions() {
     }
 }
 
-// Функція анімації для обертання коробки
+let allowRotation = false; // Змінна для контролю обертання
+
 function animate() {
     requestAnimationFrame(animate);
 
-    if (!isUserInteracting) {
-        // Обертання коробки на 360 градусів
-        if (boxGroup) {
-            boxGroup.rotation.y += 0.01; // Обертання по осі Y
-        }
+    if (allowRotation && boxGroup) {
+        boxGroup.rotation.y += 0.01; // Обертання по осі Y
     }
 
     controls.update(); // Оновлення контролерів
     renderer.render(scene, camera); // Рендеринг сцени
 }
-
 // Запускаємо ініціалізацію
 init();
+
+
+/* PRICE */
+
+
+// Функція для обчислення динамічного коефіцієнта
+function calculateDynamicCoefficient(value) {
+    let min_range, max_range, k_max, k_min;
+
+    if (value >= 1000 && value <= 1500) {
+        min_range = 1000; max_range = 1500; k_max = 0.037; k_min = 0.029;
+    } else if (value >= 1501 && value <= 2000) {
+        min_range = 1501; max_range = 2000; k_max = 0.029; k_min = 0.027;
+    } else if (value >= 2001 && value <= 2500) {
+        min_range = 2001; max_range = 2500; k_max = 0.027; k_min = 0.025;
+    } else if (value >= 2501 && value <= 3000) {
+        min_range = 2501; max_range = 3000; k_max = 0.025; k_min = 0.023;
+    } else if (value >= 3001 && value <= 3500) {
+        min_range = 3001; max_range = 3500; k_max = 0.023; k_min = 0.0195;
+    } else if (value >= 3501 && value <= 5000) {
+        min_range = 3501; max_range = 5000; k_max = 0.0195; k_min = 0.0068;
+    } else if (value >= 5001 && value <= 29500) {
+        min_range = 5001; max_range = 29500; k_max = 0.0195; k_min = 0.0068;
+    } else {
+        return "Значення поза діапазоном";
+    }
+
+    const range_width = max_range - min_range;
+    const coefficient = k_max - (k_max - k_min) * (value - min_range) / range_width;
+    
+    // Розрахунок кінцевої ціни
+    const result = coefficient * value;
+    return result;
+}
+
+// Функція для обчислення ціни на основі розмірів
+function calculatePrice(width, height, depth) {
+    const volume = width * height * depth; // Обчислення об'єму коробки
+
+    if (volume <= 1000) {
+        return 37; // Ціна фіксована, якщо об'єм менший за 1000
+    } else {
+        const price = calculateDynamicCoefficient(volume);
+        return price;
+    }
+}
+
+// Функція для оновлення ціни на сторінці
+function updatePrice() {
+    const width = parseFloat(document.getElementById("width").value);
+    const height = parseFloat(document.getElementById("height").value);
+    const depth = parseFloat(document.getElementById("depth").value);
+
+    const price = calculatePrice(width, height, depth);
+    document.getElementById("price").textContent = `$${price.toFixed(2)}`; // Вивести ціну
+}
+
+// Додати слухачі подій для змін
+document.getElementById("width").addEventListener("input", updatePrice);
+document.getElementById("height").addEventListener("input", updatePrice);
+document.getElementById("depth").addEventListener("input", updatePrice);
