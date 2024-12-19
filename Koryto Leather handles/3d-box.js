@@ -6,9 +6,9 @@ let handles = []; // Array to hold the handle meshes
 let boxGroup; // Group for the box, lid, and handles
 
 const limits = {
-    width: { min: 7.5, max: 20 },
+    width: { min: 7.5, max: 31 },
     depth: { min: 7.5, max: 31 },
-    height: { min: 6.5, max: 31 },
+    height: { min: 4, max: 31 },
 };
 
 let isUserInteracting = false; // Flag to check if the user is interacting
