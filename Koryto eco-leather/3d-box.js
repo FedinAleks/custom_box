@@ -62,9 +62,9 @@ function init() {
     });
 }
 
-// Функція для створення коробки з контурами, ручками та кришкою
+// MAIN FUNCTION
+
 function createBoxWithHandles(width, height, depth, withLid = false) {
-    // Видалення старої коробки, якщо вона існує
     if (boxGroup) {
         scene.remove(boxGroup);
     }
@@ -88,25 +88,23 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
     const extrudeSettings = { depth: depth, bevelEnabled: false };
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+    geometry.center(); // Центрування геометрії коробки
+
+    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
     box = new THREE.Mesh(geometry, material);
 
     // Додавання контурів коробки
     const edges = new THREE.EdgesGeometry(geometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const edgeMaterial = new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0.5 });
     const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
 
     boxGroup.add(box); // Додати коробку до групи
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid=== false) {
-        const lidGeometry = new THREE.PlaneGeometry(width, depth);
-        const lidMaterial = new THREE.MeshBasicMaterial({ color: 0xC5C5C5, side: THREE.DoubleSide });
-        lid = new THREE.Mesh(lidGeometry, lidMaterial);
-        lid.position.set(0, height / 2.5, 5);
-        lid.rotation.x = -Math.PI / 2;
-        boxGroup.add(lid);
+    if (withLid ===  true) {
+        const lidGroup = createLidWithWalls(width, depth, height);
+        boxGroup.add(lidGroup);
     }
 
     // Додавання ручок
@@ -115,7 +113,32 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
     scene.add(boxGroup);
 }
 
+// FUNCTION FOR LID
 
+
+function createLidWithWalls(width, depth, height, wallThickness = 1) {
+    // Група для кришки
+    const lidGroup = new THREE.Group();
+
+    // Основна площина кришки
+    const lidGeometry = new THREE.BoxGeometry(width, wallThickness, depth);
+    const lidMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    const lidMesh = new THREE.Mesh(lidGeometry, lidMaterial);
+
+    lidMesh.position.set(0, height / 2 + wallThickness / 30, 0); // Розташування кришки
+    lidGroup.add(lidMesh);
+
+    // Чорний контур для верхньої площини кришки
+    const lidEdges = new THREE.EdgesGeometry(lidGeometry);
+    const lidLine = new THREE.LineSegments(lidEdges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+    lidLine.position.copy(lidMesh.position);
+    lidGroup.add(lidLine);
+
+    return lidGroup;
+}
+
+
+// FUNCTION FOR ADDING HANDLES
 
 function addHandles(width, depth, height, boxGroup) {
     const handleMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Матеріал для контуру ручки
@@ -144,17 +167,18 @@ function addHandles(width, depth, height, boxGroup) {
 
     // Передня ручка (паралельна передній стінці коробки)
     const handleFront = new THREE.Line(handleGeometry, handleMaterial);
-    handleFront.position.set(0, handleYPosition, depth / 1 + handleDepth / 2); // Розташування перед ручкою
+    handleFront.position.set(0, handleYPosition, depth / 2 + handleDepth / 2); // Розташування перед ручкою
     boxGroup.add(handleFront);
 
     // Задня ручка (паралельна задній стінці коробки)
     const handleBack = new THREE.Line(handleGeometry, handleMaterial);
-    handleBack.position.set(0, handleYPosition, -depth / 200 - handleDepth / 5); // Розташування зад ручкою
+    handleBack.position.set(0, handleYPosition, -depth / 2 - handleDepth / 2); // Розташування зад ручкою
     boxGroup.add(handleBack);
 }
 
 
 // Функція для оновлення розмірів коробки
+
 function updateBoxDimensions() {
     const widthInput = document.getElementById("width");
     const depthInput = document.getElementById("depth");

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Cushion Wooll felt round</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Round Wooll felt</h1>
+    <div class="container">
+        <div class="controls">
+            <div class="input-group">
+                <label for="diameter">Діаметр (см):</label>
+                <input type="number" id="diameter" value="15" min="9" max="25">
+                <button onclick="updatePillowSize()">CUSTOM</button>
+            </div>
+            <div id="error-message"></div>
+            <label for="price">Ціна:</label>
+            <p id="price"></p>
+            <p id="error-message" style="color: red;"></p>
+        </div>
+        <div class="visualization">
+            <!-- Canvas will be placed here by JavaScript -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="3d-box.js"></script>
+</body>
+
+</html>

@@ -27,6 +27,12 @@ h1 {
     gap: 15px;
     color: #333;
 }
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: column;
+}
 button {
     padding: 10px 20px;
     background-color: #333;
