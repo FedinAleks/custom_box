@@ -8,13 +8,12 @@ let boxGroup; // Group for the box, lid, and handles
 const limits = {
     width: { min: 7.5, max: 31 },
     depth: { min: 7.5, max: 31 },
-    height: { min: 4, max: 31 },
+    height: { min: 5.5, max: 31 },
 };
 
 let isUserInteracting = false; // Flag to check if the user is interacting
 
 // Ініціалізація сцени
-
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -47,9 +46,10 @@ function init() {
     createBoxWithHandles(10, 10, 10, true);
 
     // Додавання слухачів подій для взаємодії
-    controls.addEventListener('start', () => isUserInteracting = true); 
-    controls.addEventListener('end', () => isUserInteracting = false);
+    controls.addEventListener('start', () => isUserInteracting = true); // Коли починається взаємодія
+    controls.addEventListener('end', () => isUserInteracting = false); // Коли взаємодія закінчується
 
+    // Запуск анімації
     animate();
 
     // Додати обробник подій для зміни розміру вікна
@@ -65,7 +65,6 @@ function init() {
 // MAIN FUNCTION
 
 function createBoxWithHandles(width, height, depth, withLid = false) {
-    // Видалення старої коробки, якщо вона існує
     if (boxGroup) {
         scene.remove(boxGroup);
     }
@@ -91,19 +90,19 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
 
     geometry.center(); // Центрування геометрії коробки
 
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
     box = new THREE.Mesh(geometry, material);
 
     // Додавання контурів коробки
     const edges = new THREE.EdgesGeometry(geometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5});
+    const edgeMaterial = new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0.5 });
     const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
 
     boxGroup.add(box); // Додати коробку до групи
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  false) {
+    if (withLid ===  true) {
         const lidGroup = createLidWithWalls(width, depth, height);
         boxGroup.add(lidGroup);
     }
@@ -113,7 +112,6 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
 
     scene.add(boxGroup);
 }
-
 
 // FUNCTION FOR LID
 
@@ -140,20 +138,17 @@ function createLidWithWalls(width, depth, height, wallThickness = 1) {
 }
 
 
-
 // FUNCTION FOR ADDING HANDLES
 
 function addHandles(width, depth, height, boxGroup) {
     const handleMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Матеріал для контуру ручки
-    const handleWidth = 7; // Ширина ручки
-    const handleHeight = 0.5; // Товщина ручки
+    const handleWidth = 3; // Ширина ручки
+    const handleHeight = 1; // Товщина ручки
     const handleDepth = 0.1; // Глибина ручки
-    const cornerRadius = 0.3; // Радіус закруглення кутів
-    const circleRadius = 0.1; // Радіус маленьких вертикальних циліндрів
-    const circleHeight = 0.1; // Висота маленьких вертикальних циліндрів
+    const cornerRadius = 0.5; // Радіус закруглення кутів
 
     // Відстань ручок від верхньої частини коробки
-    const handleYPosition = height * 0.15;
+    const handleYPosition = height * 0.25;
 
     // Створення форми з округленими кутами для ручки
     const shape = new THREE.Shape();
@@ -179,60 +174,7 @@ function addHandles(width, depth, height, boxGroup) {
     const handleBack = new THREE.Line(handleGeometry, handleMaterial);
     handleBack.position.set(0, handleYPosition, -depth / 2 - handleDepth / 2); // Розташування зад ручкою
     boxGroup.add(handleBack);
-
-    // Створення маленьких вертикальних циліндрів для ручок
-    const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-
-    // Ліві циліндри
-    const cylinderLeft = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderLeft.position.set(-handleWidth / 3 + circleRadius, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderLeft.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderLeft);
-
-    // Праві циліндри
-    const cylinderRight = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderRight.position.set(handleWidth / 3 - circleRadius, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderRight.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderRight);
-
-    // Ліві циліндри для задньої ручки
-    const cylinderLeftBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderLeftBack.position.set(-handleWidth / 3 + circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderLeftBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderLeftBack);
-
-    // Праві циліндри для задньої ручки
-    const cylinderRightBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderRightBack.position.set(handleWidth / 3 - circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderRightBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderRightBack);
-
-    // Дублювання циліндрів для ручок
-
-    // передній лівий циліндр (біля заокруглення)
-    const cylinderBottomLeft = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderBottomLeft.position.set(-handleWidth / 2.15, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderBottomLeft.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderBottomLeft);
-
-    // передній правий циліндр (біля заокруглення)
-    const cylinderBottomRight = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderBottomRight.position.set(handleWidth / 2.15, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderBottomRight.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderBottomRight);
-
-    // Ліві циліндри для задньої ручки (біля заокруглення)
-    const cylinderLeftRoundBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderLeftRoundBack.position.set(-handleWidth / 2.15 + circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderLeftRoundBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderLeftRoundBack);
-
-    // Праві циліндри для задньої ручки (біля заокруглення)
-    const cylinderRightRoundBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderRightRoundBack.position.set(handleWidth / 2.15 - circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderRightRoundBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderRightRoundBack);
-    }
+}
 
 
 // Функція для оновлення розмірів коробки
@@ -270,10 +212,11 @@ function animate() {
         boxGroup.rotation.y += 0.01; // Обертання по осі Y
     }
 
-    controls.update();
-    renderer.render(scene, camera);
+    controls.update(); // Оновлення контролерів
+    renderer.render(scene, camera); // Рендеринг сцени
 }
 
+// Запускаємо ініціалізацію
 init();
 
 

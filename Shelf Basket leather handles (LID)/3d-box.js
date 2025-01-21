@@ -8,13 +8,12 @@ let boxGroup; // Group for the box, lid, and handles
 const limits = {
     width: { min: 7.5, max: 31 },
     depth: { min: 7.5, max: 31 },
-    height: { min: 4, max: 31 },
+    height: { min: 6.5, max: 31 },
 };
 
 let isUserInteracting = false; // Flag to check if the user is interacting
 
 // Ініціалізація сцени
-
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -47,9 +46,10 @@ function init() {
     createBoxWithHandles(10, 10, 10, true);
 
     // Додавання слухачів подій для взаємодії
-    controls.addEventListener('start', () => isUserInteracting = true); 
-    controls.addEventListener('end', () => isUserInteracting = false);
+    controls.addEventListener('start', () => isUserInteracting = true); // Коли починається взаємодія
+    controls.addEventListener('end', () => isUserInteracting = false); // Коли взаємодія закінчується
 
+    // Запуск анімації
     animate();
 
     // Додати обробник подій для зміни розміру вікна
@@ -64,8 +64,7 @@ function init() {
 
 // MAIN FUNCTION
 
-function createBoxWithHandles(width, height, depth, withLid = false) {
-    // Видалення старої коробки, якщо вона існує
+function createBoxWithHandles(depth, height, width, withLid = false) { // Міняємо місцями width і depth
     if (boxGroup) {
         scene.remove(boxGroup);
     }
@@ -77,39 +76,39 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
 
     // Створення форми для нижньої частини коробки
     const shape = new THREE.Shape();
-    shape.moveTo(-width / 2 + cornerRadius, -height / 2);
-    shape.lineTo(width / 2 - cornerRadius, -height / 2);
-    shape.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + cornerRadius);
-    shape.lineTo(width / 2, height / 2 - cornerRadius);
-    shape.lineTo(-width / 2, height / 2 - cornerRadius);
-    shape.lineTo(-width / 2, -height / 2 + cornerRadius);
-    shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + cornerRadius, -height / 2);
+    shape.moveTo(-depth / 2 + cornerRadius, -height / 2);  // Тут також змінюємо на depth
+    shape.lineTo(depth / 2 - cornerRadius, -height / 2);  // Тут також змінюємо на depth
+    shape.quadraticCurveTo(depth / 2, -height / 2, depth / 2, -height / 2 + cornerRadius);
+    shape.lineTo(depth / 2, height / 2 - cornerRadius);
+    shape.lineTo(-depth / 2, height / 2 - cornerRadius);
+    shape.lineTo(-depth / 2, -height / 2 + cornerRadius);
+    shape.quadraticCurveTo(-depth / 2, -height / 2, -depth / 2 + cornerRadius, -height / 2);
 
     // Екструзія форми для створення об'єму коробки
-    const extrudeSettings = { depth: depth, bevelEnabled: false };
+    const extrudeSettings = { depth: width, bevelEnabled: false };  // Тут міняємо на width
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
     geometry.center(); // Центрування геометрії коробки
 
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
     box = new THREE.Mesh(geometry, material);
 
     // Додавання контурів коробки
     const edges = new THREE.EdgesGeometry(geometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5});
+    const edgeMaterial = new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0.5 });
     const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
 
     boxGroup.add(box); // Додати коробку до групи
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  false) {
-        const lidGroup = createLidWithWalls(width, depth, height);
+    if (withLid ===  true) {
+        const lidGroup = createLidWithWalls(depth, width, height);  // Міняємо на відповідні параметри
         boxGroup.add(lidGroup);
     }
 
     // Додавання ручок
-    addHandles(width, depth, height, boxGroup);
+    addHandles(depth, width, height, boxGroup); 
 
     scene.add(boxGroup);
 }
@@ -140,6 +139,7 @@ function createLidWithWalls(width, depth, height, wallThickness = 1) {
 }
 
 
+// FUNCTION FOR HANDLES
 
 // FUNCTION FOR ADDING HANDLES
 
@@ -153,7 +153,7 @@ function addHandles(width, depth, height, boxGroup) {
     const circleHeight = 0.1; // Висота маленьких вертикальних циліндрів
 
     // Відстань ручок від верхньої частини коробки
-    const handleYPosition = height * 0.15;
+    const handleYPosition = height * 0.25;
 
     // Створення форми з округленими кутами для ручки
     const shape = new THREE.Shape();
@@ -235,8 +235,9 @@ function addHandles(width, depth, height, boxGroup) {
     }
 
 
-// Функція для оновлення розмірів коробки
 
+
+// Функція для оновлення розмірів коробки
 function updateBoxDimensions() {
     const widthInput = document.getElementById("width");
     const depthInput = document.getElementById("depth");
@@ -270,10 +271,11 @@ function animate() {
         boxGroup.rotation.y += 0.01; // Обертання по осі Y
     }
 
-    controls.update();
-    renderer.render(scene, camera);
+    controls.update(); // Оновлення контролерів
+    renderer.render(scene, camera); // Рендеринг сцени
 }
 
+// Запускаємо ініціалізацію
 init();
 
 

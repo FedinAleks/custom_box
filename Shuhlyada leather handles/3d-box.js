@@ -102,7 +102,7 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  true) {
+    if (withLid ===  false) {
         const lidGroup = createLidWithWalls(depth, width, height);  // Міняємо на відповідні параметри
         boxGroup.add(lidGroup);
     }

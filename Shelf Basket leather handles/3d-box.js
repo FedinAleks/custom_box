@@ -8,7 +8,7 @@ let boxGroup; // Group for the box, lid, and handles
 const limits = {
     width: { min: 7.5, max: 31 },
     depth: { min: 7.5, max: 31 },
-    height: { min: 6.5, max: 31 },
+    height: { min: 6, max: 31 },
 };
 
 let isUserInteracting = false; // Flag to check if the user is interacting
@@ -102,7 +102,7 @@ function createBoxWithHandles(depth, height, width, withLid = false) { // Мін
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  true) {
+    if (withLid ===  false) {
         const lidGroup = createLidWithWalls(depth, width, height);  // Міняємо на відповідні параметри
         boxGroup.add(lidGroup);
     }

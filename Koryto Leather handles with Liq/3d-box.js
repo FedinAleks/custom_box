@@ -8,7 +8,7 @@ let boxGroup; // Group for the box, lid, and handles
 const limits = {
     width: { min: 7.5, max: 31 },
     depth: { min: 7.5, max: 31 },
-    height: { min: 4, max: 31 },
+    height: { min: 5.5, max: 31 },
 };
 
 let isUserInteracting = false; // Flag to check if the user is interacting
@@ -103,7 +103,7 @@ function createBoxWithHandles(width, height, depth, withLid = false) {
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  false) {
+    if (withLid ===  true) {
         const lidGroup = createLidWithWalls(width, depth, height);
         boxGroup.add(lidGroup);
     }
@@ -153,7 +153,7 @@ function addHandles(width, depth, height, boxGroup) {
     const circleHeight = 0.1; // Висота маленьких вертикальних циліндрів
 
     // Відстань ручок від верхньої частини коробки
-    const handleYPosition = height * 0.15;
+    const handleYPosition = height * 0.25;
 
     // Створення форми з округленими кутами для ручки
     const shape = new THREE.Shape();

@@ -102,7 +102,7 @@ function createBoxWithHandles(depth, height, width, withLid = false) { // Мін
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  true) {
+    if (withLid ===  false) {
         const lidGroup = createLidWithWalls(depth, width, height);  // Міняємо на відповідні параметри
         boxGroup.add(lidGroup);
     }
@@ -149,7 +149,7 @@ function addHandles(width, depth, height, boxGroup) {
     const cornerRadius = 0.5; // Радіус закруглення кутів
 
     // Відстань ручок від верхньої частини коробки
-    const handleYPosition = height * 0.25;
+    const handleYPosition = height * 0.15;
 
     // Створення форми з округленими кутами для ручки
     const shape = new THREE.Shape();
