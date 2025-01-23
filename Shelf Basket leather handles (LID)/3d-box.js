@@ -64,7 +64,7 @@ function init() {
 
 // MAIN FUNCTION
 
-function createBoxWithHandles(depth, height, width, withLid = false) { // Міняємо місцями width і depth
+function createBoxWithHandles(depth, height, width, withLid = false) {
     if (boxGroup) {
         scene.remove(boxGroup);
     }
@@ -74,44 +74,58 @@ function createBoxWithHandles(depth, height, width, withLid = false) { // Мін
 
     const cornerRadius = 1; // Радіус округлення кутів
 
-    // Створення форми для нижньої частини коробки
+    // Створення форми для коробки з округленням нижніх кутів
     const shape = new THREE.Shape();
-    shape.moveTo(-depth / 2 + cornerRadius, -height / 2);  // Тут також змінюємо на depth
-    shape.lineTo(depth / 2 - cornerRadius, -height / 2);  // Тут також змінюємо на depth
-    shape.quadraticCurveTo(depth / 2, -height / 2, depth / 2, -height / 2 + cornerRadius);
-    shape.lineTo(depth / 2, height / 2 - cornerRadius);
-    shape.lineTo(-depth / 2, height / 2 - cornerRadius);
-    shape.lineTo(-depth / 2, -height / 2 + cornerRadius);
-    shape.quadraticCurveTo(-depth / 2, -height / 2, -depth / 2 + cornerRadius, -height / 2);
+
+    // Лівий нижній кут (округлення по осі Y)
+    shape.moveTo(-width / 2, -height / 2 + cornerRadius);
+    shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + cornerRadius, -height / 2);
+
+    // Нижня сторона
+    shape.lineTo(width / 2 - cornerRadius, -height / 2);
+
+    // Правий нижній кут (округлення по осі Y)
+    shape.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + cornerRadius);
+
+    // Права сторона
+    shape.lineTo(width / 2, height / 2);
+
+    // Верхня сторона
+    shape.lineTo(-width / 2, height / 2);
+
+    // Закриття форми
+    shape.lineTo(-width / 2, -height / 2 + cornerRadius);
 
     // Екструзія форми для створення об'єму коробки
-    const extrudeSettings = { depth: width, bevelEnabled: false };  // Тут міняємо на width
+    const extrudeSettings = { depth: depth, bevelEnabled: false };
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
     geometry.center(); // Центрування геометрії коробки
 
-    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
     box = new THREE.Mesh(geometry, material);
 
     // Додавання контурів коробки
     const edges = new THREE.EdgesGeometry(geometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0.5 });
+    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
     const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
 
     boxGroup.add(box); // Додати коробку до групи
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  true) {
-        const lidGroup = createLidWithWalls(depth, width, height);  // Міняємо на відповідні параметри
+    if (withLid === true) {
+        const lidGroup = createLidWithWalls(width, depth, height);
         boxGroup.add(lidGroup);
     }
 
     // Додавання ручок
-    addHandles(depth, width, height, boxGroup); 
+    addHandles(width, depth, height, boxGroup);
 
     scene.add(boxGroup);
 }
+
+
 
 
 // FUNCTION FOR LID
@@ -126,7 +140,7 @@ function createLidWithWalls(width, depth, height, wallThickness = 1) {
     const lidMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
     const lidMesh = new THREE.Mesh(lidGeometry, lidMaterial);
 
-    lidMesh.position.set(0, height / 2 + wallThickness / 30, 0); // Розташування кришки
+    lidMesh.position.set(0, height / 1.857 + wallThickness / 30, 0); // Розташування кришки
     lidGroup.add(lidMesh);
 
     // Чорний контур для верхньої площини кришки
@@ -137,9 +151,6 @@ function createLidWithWalls(width, depth, height, wallThickness = 1) {
 
     return lidGroup;
 }
-
-
-// FUNCTION FOR HANDLES
 
 // FUNCTION FOR ADDING HANDLES
 
@@ -170,69 +181,67 @@ function addHandles(width, depth, height, boxGroup) {
     // Створення геометрії для 2D-контурів
     const handleGeometry = new THREE.BufferGeometry().setFromPoints(shape.getPoints());
 
-    // Передня ручка (паралельна передній стінці коробки)
-    const handleFront = new THREE.Line(handleGeometry, handleMaterial);
-    handleFront.position.set(0, handleYPosition, depth / 2 + handleDepth / 2); // Розташування перед ручкою
-    boxGroup.add(handleFront);
+    // Ліва ручка (паралельна лівій стінці коробки)
+    const handleLeft = new THREE.Line(handleGeometry, handleMaterial);
+    handleLeft.position.set(-width / 2 - handleDepth / 2, handleYPosition, 0); // Розташування лівої ручки
+    handleLeft.rotation.y = Math.PI / 2; // Повертаємо ручку, щоб була паралельна боковій стінці
+    boxGroup.add(handleLeft);
 
-    // Задня ручка (паралельна задній стінці коробки)
-    const handleBack = new THREE.Line(handleGeometry, handleMaterial);
-    handleBack.position.set(0, handleYPosition, -depth / 2 - handleDepth / 2); // Розташування зад ручкою
-    boxGroup.add(handleBack);
+    // Права ручка (паралельна правій стінці коробки)
+    const handleRight = new THREE.Line(handleGeometry, handleMaterial);
+    handleRight.position.set(width / 2 + handleDepth / 2, handleYPosition, 0); // Розташування правої ручки
+    handleRight.rotation.y = Math.PI / 2; // Повертаємо ручку, щоб була паралельна боковій стінці
+    boxGroup.add(handleRight);
 
     // Створення маленьких вертикальних циліндрів для ручок
-    const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
-    // Ліві циліндри
-    const cylinderLeft = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderLeft.position.set(-handleWidth / 3 + circleRadius, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderLeft.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderLeft);
+// Ліві циліндри
+const cylinderLeft = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderLeft.position.set(-width / 2 - handleDepth / 2, handleYPosition, -handleWidth / 3 + circleRadius);
+cylinderLeft.rotation.z = Math.PI / 2; // Вертикальне положення
+boxGroup.add(cylinderLeft);
 
-    // Праві циліндри
-    const cylinderRight = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderRight.position.set(handleWidth / 3 - circleRadius, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderRight.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderRight);
+const cylinderLeftBottom = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderLeftBottom.position.set(-width / 2 - handleDepth / 2, handleYPosition, handleWidth / 3 - circleRadius);
+cylinderLeftBottom.rotation.z = Math.PI / 2; // Вертикальне положення
+boxGroup.add(cylinderLeftBottom);
 
-    // Ліві циліндри для задньої ручки
-    const cylinderLeftBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderLeftBack.position.set(-handleWidth / 3 + circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderLeftBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderLeftBack);
+// Додаткові ліві циліндри ближче до бокових стінок
+const cylinderLeftInner = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderLeftInner.position.set(-width / 2 - handleDepth / 2, handleYPosition, -handleWidth / 2.15);
+cylinderLeftInner.rotation.z = Math.PI / 2;
+boxGroup.add(cylinderLeftInner);
 
-    // Праві циліндри для задньої ручки
-    const cylinderRightBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderRightBack.position.set(handleWidth / 3 - circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderRightBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderRightBack);
+const cylinderLeftInnerBottom = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderLeftInnerBottom.position.set(-width / 2 - handleDepth / 2, handleYPosition, handleWidth / 2.15);
+cylinderLeftInnerBottom.rotation.z = Math.PI / 2;
+boxGroup.add(cylinderLeftInnerBottom);
 
-    // Дублювання циліндрів для ручок
+// Праві циліндри
+const cylinderRight = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderRight.position.set(width / 2 + handleDepth / 2, handleYPosition, -handleWidth / 3 + circleRadius);
+cylinderRight.rotation.z = Math.PI / 2; // Вертикальне положення
+boxGroup.add(cylinderRight);
 
-    // передній лівий циліндр (біля заокруглення)
-    const cylinderBottomLeft = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderBottomLeft.position.set(-handleWidth / 2.15, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderBottomLeft.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderBottomLeft);
+const cylinderRightBottom = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderRightBottom.position.set(width / 2 + handleDepth / 2, handleYPosition, handleWidth / 3 - circleRadius);
+cylinderRightBottom.rotation.z = Math.PI / 2; // Вертикальне положення
+boxGroup.add(cylinderRightBottom);
 
-    // передній правий циліндр (біля заокруглення)
-    const cylinderBottomRight = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderBottomRight.position.set(handleWidth / 2.15, handleYPosition, depth / 2 + handleDepth / 2);
-    cylinderBottomRight.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderBottomRight);
+// Додаткові праві циліндри ближче до бокових стінок
+const cylinderRightInner = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderRightInner.position.set(width / 2 + handleDepth / 2, handleYPosition, -handleWidth / 2.15);
+cylinderRightInner.rotation.z = Math.PI / 2;
+boxGroup.add(cylinderRightInner);
 
-    // Ліві циліндри для задньої ручки (біля заокруглення)
-    const cylinderLeftRoundBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderLeftRoundBack.position.set(-handleWidth / 2.15 + circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderLeftRoundBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderLeftRoundBack);
+const cylinderRightInnerBottom = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
+cylinderRightInnerBottom.position.set(width / 2 + handleDepth / 2, handleYPosition, handleWidth / 2.15);
+cylinderRightInnerBottom.rotation.z = Math.PI / 2;
+boxGroup.add(cylinderRightInnerBottom);
 
-    // Праві циліндри для задньої ручки (біля заокруглення)
-    const cylinderRightRoundBack = new THREE.Mesh(new THREE.CylinderGeometry(circleRadius, circleRadius, circleHeight, 32), cylinderMaterial);
-    cylinderRightRoundBack.position.set(handleWidth / 2.15 - circleRadius, handleYPosition, -depth / 2 - handleDepth / 2);
-    cylinderRightRoundBack.rotation.x = Math.PI / 2; // Оборот для вертикального положення
-    boxGroup.add(cylinderRightRoundBack);
-    }
+}
+
 
 
 

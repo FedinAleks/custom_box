@@ -64,7 +64,7 @@ function init() {
 
 // MAIN FUNCTION
 
-function createBoxWithHandles(depth, height, width, withLid = false) { // Міняємо місцями width і depth
+function createBoxWithHandles(depth, height, width, withLid = false) {
     if (boxGroup) {
         scene.remove(boxGroup);
     }
@@ -74,44 +74,58 @@ function createBoxWithHandles(depth, height, width, withLid = false) { // Мін
 
     const cornerRadius = 1; // Радіус округлення кутів
 
-    // Створення форми для нижньої частини коробки
+    // Створення форми для коробки з округленням нижніх кутів
     const shape = new THREE.Shape();
-    shape.moveTo(-depth / 2 + cornerRadius, -height / 2);  // Тут також змінюємо на depth
-    shape.lineTo(depth / 2 - cornerRadius, -height / 2);  // Тут також змінюємо на depth
-    shape.quadraticCurveTo(depth / 2, -height / 2, depth / 2, -height / 2 + cornerRadius);
-    shape.lineTo(depth / 2, height / 2 - cornerRadius);
-    shape.lineTo(-depth / 2, height / 2 - cornerRadius);
-    shape.lineTo(-depth / 2, -height / 2 + cornerRadius);
-    shape.quadraticCurveTo(-depth / 2, -height / 2, -depth / 2 + cornerRadius, -height / 2);
+
+    // Лівий нижній кут (округлення по осі Y)
+    shape.moveTo(-width / 2, -height / 2 + cornerRadius);
+    shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + cornerRadius, -height / 2);
+
+    // Нижня сторона
+    shape.lineTo(width / 2 - cornerRadius, -height / 2);
+
+    // Правий нижній кут (округлення по осі Y)
+    shape.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + cornerRadius);
+
+    // Права сторона
+    shape.lineTo(width / 2, height / 2);
+
+    // Верхня сторона
+    shape.lineTo(-width / 2, height / 2);
+
+    // Закриття форми
+    shape.lineTo(-width / 2, -height / 2 + cornerRadius);
 
     // Екструзія форми для створення об'єму коробки
-    const extrudeSettings = { depth: width, bevelEnabled: false };  // Тут міняємо на width
+    const extrudeSettings = { depth: depth, bevelEnabled: false };
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
     geometry.center(); // Центрування геометрії коробки
 
-    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
     box = new THREE.Mesh(geometry, material);
 
     // Додавання контурів коробки
     const edges = new THREE.EdgesGeometry(geometry);
-    const edgeMaterial = new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0.5 });
+    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
     const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
 
     boxGroup.add(box); // Додати коробку до групи
     boxGroup.add(edgeLines); // Додати контури
 
     // Додавання кришки
-    if (withLid ===  false) {
-        const lidGroup = createLidWithWalls(depth, width, height);  // Міняємо на відповідні параметри
+    if (withLid === false) {
+        const lidGroup = createLidWithWalls(width, depth, height);
         boxGroup.add(lidGroup);
     }
 
     // Додавання ручок
-    addHandles(depth, width, height, boxGroup); 
+    addHandles(width, depth, height, boxGroup);
 
     scene.add(boxGroup);
 }
+
+
 
 
 // FUNCTION FOR LID
@@ -166,18 +180,19 @@ function addHandles(width, depth, height, boxGroup) {
     // Створення геометрії для 2D-контурів
     const handleGeometry = new THREE.BufferGeometry().setFromPoints(shape.getPoints());
 
-    // Ліва ручка (паралельна лівій боковій стінці)
+    // Ліва ручка (паралельна лівій стінці коробки)
     const handleLeft = new THREE.Line(handleGeometry, handleMaterial);
     handleLeft.position.set(-width / 2 - handleDepth / 2, handleYPosition, 0); // Розташування лівої ручки
-    handleLeft.rotation.y = Math.PI / 2; // Поворот ручки для орієнтації паралельно осі Z
+    handleLeft.rotation.y = Math.PI / 2; // Обертання, щоб ручка була паралельна стінці
     boxGroup.add(handleLeft);
 
-    // Права ручка (паралельна правій боковій стінці)
+    // Права ручка (паралельна правій стінці коробки)
     const handleRight = new THREE.Line(handleGeometry, handleMaterial);
     handleRight.position.set(width / 2 + handleDepth / 2, handleYPosition, 0); // Розташування правої ручки
-    handleRight.rotation.y = Math.PI / 2; // Поворот ручки для орієнтації паралельно осі Z
+    handleRight.rotation.y = Math.PI / 2; // Обертання, щоб ручка була паралельна стінці
     boxGroup.add(handleRight);
 }
+
 
 
 
